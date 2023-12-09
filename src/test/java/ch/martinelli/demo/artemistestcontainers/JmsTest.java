@@ -20,9 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 class JmsTest {
 
-    @Autowired
-    private JmsTemplate jmsTemplate;
-
     @Container
     static GenericContainer<?> artemis = new GenericContainer<>(DockerImageName.parse("apache/activemq-artemis:latest-alpine"))
             .withEnv("ANONYMOUS_LOGIN", "true")
@@ -30,20 +27,21 @@ class JmsTest {
 
     @DynamicPropertySource
     static void artemisProperties(DynamicPropertyRegistry registry) {
-        System.out.println("ports: " + artemis.getPortBindings());
-
         registry.add("spring.artemis.broker-url", () -> "tcp://%s:%d".formatted(artemis.getHost(), artemis.getMappedPort(61616)));
     }
 
+    @Autowired
+    private JmsTemplate jmsTemplate;
+
     @Test
     void sendMessage() throws JMSException {
-        jmsTemplate.convertAndSend("testQueue", "Hallo");
+        jmsTemplate.convertAndSend("testQueue", "Hello, JMS!");
 
         Message message = jmsTemplate.receive("testQueue");
 
         assertThat(message).isInstanceOf(TextMessage.class);
         TextMessage textMessage = (TextMessage) message;
-        assertThat(textMessage.getText()).isEqualTo("Hallo");
+        assertThat(textMessage.getText()).isEqualTo("Hello, JMS!");
     }
 
 }
