@@ -1,1 +1,1 @@
-# spring-boot-artemis-testcontainers
+# Sample Project using Spring Boot, Artemis and TestContainers
